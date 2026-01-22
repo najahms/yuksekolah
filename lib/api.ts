@@ -1,16 +1,22 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://yuksekolah.yuksekolah.online/api';
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://yuksekolah.yuksekolah.online/api";
 
-// Helper function untuk handle API responses
 async function handleResponse(response: Response) {
+  const data = await response.json();
+
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error || 'Network response was not ok');
+    throw new Error(data.message || "Request gagal");
   }
-  return response.json();
+
+  return data;
 }
 
-// Auth API functions
 export const authApi = {
+  async testConnection() {
+    const response = await fetch(`${API_URL}/test-connection`);
+    return handleResponse(response);
+  },
+
   async registerSchool(data: {
     school_name: string;
     school_email: string;
@@ -21,41 +27,21 @@ export const authApi = {
     admin_password: string;
   }) {
     const response = await fetch(`${API_URL}/register-school`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
+
     return handleResponse(response);
   },
 
   async login(email: string, password: string) {
     const response = await fetch(`${API_URL}/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    return handleResponse(response);
-  },
 
-  async logout(token: string) {
-    const response = await fetch(`${API_URL}/logout`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    return handleResponse(response);
-  },
-
-  async getCurrentUser(token: string) {
-    const response = await fetch(`${API_URL}/me`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
     return handleResponse(response);
   },
 };
-
-export default { authApi };
